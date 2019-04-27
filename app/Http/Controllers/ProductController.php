@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use \Exception;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use JavaScript;
 
 class ProductController extends Controller
 {
@@ -28,6 +29,11 @@ class ProductController extends Controller
      */
     public function create()
     {
+        JavaScript::put([
+            'url_store_product' => route('product.store'),
+            'url_products' => route('product.index'),
+        ]);
+
         return view('Product/create');
     }
 
@@ -56,9 +62,16 @@ class ProductController extends Controller
                 'total' => $request->quantity * $request->price,
             ]);
 
-            return redirect()->route('product.index');
+            return response()->json(['errors' => false]);
+        } catch (ValidationException $e) {
+            $validator = $e->validator;
+            $message = 'Validator fails.';
+            if (($validator instanceof \Illuminate\Validation\Validator) && method_exists($e, 'errors')) {
+                $message = implode(' ', $validator->errors()->all());
+            }
+            return response()->json(['errors' => true, 'description' => $message]);
         } catch (Exception $e) {
-            return back()->withErrors($e->getMessage());
+            return response()->json(['errors' => true, 'description' => $e->getMessage()]);
         }
     }
 
@@ -81,6 +94,16 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
+        JavaScript::put([
+            'url_update_product' => route('product.update', $product),
+            'url_products' => route('product.index'),
+            'product' => [
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $product->quantity,
+            ]
+        ]);
+
         return view('Product/edit', compact('product'));
     }
 
@@ -112,9 +135,16 @@ class ProductController extends Controller
                 'total' => $request->quantity * $request->price,
             ]);
 
-            return redirect()->route('product.index');
+            return response()->json(['errors' => false]);
+        } catch (ValidationException $e) {
+            $validator = $e->validator;
+            $message = 'Validator fails.';
+            if (($validator instanceof \Illuminate\Validation\Validator) && method_exists($e, 'errors')) {
+                $message = implode(' ', $validator->errors()->all());
+            }
+            return response()->json(['errors' => true, 'description' => $message]);
         } catch (Exception $e) {
-            return back()->withErrors($e->getMessage());
+            return response()->json(['errors' => true, 'description' => $e->getMessage()]);
         }
     }
 
@@ -125,6 +155,6 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('product.index')->with(['info'=>'Product removed.']);
+        return redirect()->route('product.index')->with(['info' => 'Product removed.']);
     }
 }
