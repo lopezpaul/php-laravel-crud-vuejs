@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Product;
 use Illuminate\Http\Request;
 use \Exception;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use JavaScript;
+use Spatie\ArrayToXml\ArrayToXml;
 
 class ProductController extends Controller
 {
@@ -156,5 +158,51 @@ class ProductController extends Controller
     {
         $product->delete();
         return redirect()->route('product.index')->with(['info' => 'Product removed.']);
+    }
+
+    /**
+     * Store all the Products in file
+     * @param Request $request
+     * @param string $type json|xml
+     * @return mixed
+     */
+    public function backup(Request $request,$type='json')
+    {
+        try {
+            $filename = 'products.json';
+            $content = '';
+            $products = Product::orderBy('created_at', 'desc')->get();
+            switch ($type) {
+                case 'xml':
+                    $content = $this->storeXML($products);
+                    $filename = 'products.xml';
+                    break;
+                default:
+                    $content = json_encode($products);
+
+            }
+            Storage::put($filename, $content);
+            return Storage::download($filename);
+        }catch (Exception $e){
+            abort(404,'File not found.');
+        }
+    }
+
+    /**
+     * @param $products
+     * @return string $content
+     */
+    protected function storeXML($products)
+    {
+        $xml = new \SimpleXMLElement('<products/>');
+        foreach($products as $v){
+            $product = $xml->addChild('product');
+            $product->addChild('id', $v->id);
+            $product->addChild('name', $v->name);
+            $product->addChild('price', $v->price);
+            $product->addChild('quantity', $v->quantity);
+            $product->addChild('total', $v->total);
+        }
+        return $xml->asXML();
     }
 }

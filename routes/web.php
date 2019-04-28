@@ -12,4 +12,5 @@
 */
 
 Route::get('/', 'ProductController@index');
+Route::get('/backup/{type}', 'ProductController@backup')->name('backup');
 Route::resource('product', 'ProductController');

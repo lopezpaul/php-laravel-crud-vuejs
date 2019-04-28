@@ -1,5 +1,12 @@
 @extends('layout')
 @section('content')
+    <div class="row" >
+        <div class="col-12 text-right my-2">
+            <span class="col-form-label" >Backup Database</span>
+            <a href="{{ url('backup/xml') }}" class="btn btn-primary  btn-sm" >XML</a>
+            <a href="{{ url('backup/json') }}" class="btn btn-primary  btn-sm" >JSON</a>
+        </div>
+    </div>
     <div class="table-responsive">
     <table class="table table-striped" >
         <thead class="thead-dark">
