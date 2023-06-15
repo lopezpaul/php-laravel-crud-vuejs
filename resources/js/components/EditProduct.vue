@@ -1,9 +1,9 @@
 <template>
     <div class="container">
-        <!--<div class="form-group">-->
-            <!--<label for="name">ID</label>-->
-            <!--<span class="badge-success px-1" >{{ id }}</span>-->
-        <!--</div>-->
+        <div class="form-group">
+            <label for="name">ID</label>
+            <span class="badge-success px-1" >{{ id }}</span>
+        </div>
         <div class="form-group">
             <label for="name">Name</label>
             <input v-model="name" type="text" class="form-control" placeholder="Name">
@@ -26,7 +26,6 @@
 
 <script>
     export default {
-        // props:[name,price,quantity],
         data: function(){
             return {
                 name:system.product.name,

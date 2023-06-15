@@ -21,7 +21,8 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::orderBy('created_at', 'desc')->paginate(10);
-        return view('Product/index', compact('products'));
+        $total = Product::sum('total');
+        return view('Product/index', compact('products', 'total'));
     }
 
     /**
@@ -166,7 +167,7 @@ class ProductController extends Controller
      * @param string $type json|xml
      * @return mixed
      */
-    public function backup(Request $request,$type='json')
+    public function backup(Request $request, $type = 'json')
     {
         try {
             $filename = 'products.json';
@@ -179,12 +180,11 @@ class ProductController extends Controller
                     break;
                 default:
                     $content = json_encode($products);
-
             }
             Storage::put($filename, $content);
             return Storage::download($filename);
-        }catch (Exception $e){
-            abort(404,'File not found.');
+        } catch (Exception $e) {
+            abort(404, 'File not found.');
         }
     }
 
@@ -195,7 +195,7 @@ class ProductController extends Controller
     protected function storeXML($products)
     {
         $xml = new \SimpleXMLElement('<products/>');
-        foreach($products as $v){
+        foreach ($products as $v) {
             $product = $xml->addChild('product');
             $product->addChild('id', $v->id);
             $product->addChild('name', $v->name);
